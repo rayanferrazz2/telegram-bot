@@ -1,6 +1,6 @@
 import os
 from dotenv import load_dotenv
-from telegram.ext import Updater, CommandHandler, MessageHandler, filters
+from telegram.ext import Application, CommandHandler, MessageHandler, filters
 
 # Carregar variáveis de ambiente do arquivo .env
 load_dotenv()
@@ -14,23 +14,23 @@ from handlers.game_handler import next_game
 from handlers.stats_handler import stats
 from handlers.conversation_handler import handle_message  # Agora usando GPT-J via Hugging Face
 
-def main():
-    updater = Updater(TOKEN)
-    dispatcher = updater.dispatcher
+async def main():
+    # Criar a aplicação corretamente
+    application = Application.builder().token(TOKEN).build()
 
     # Adicionar os comandos do bot
-    dispatcher.add_handler(CommandHandler("start", start))
-    dispatcher.add_handler(CommandHandler("help", help_command))
-    dispatcher.add_handler(CommandHandler("news", news))
-    dispatcher.add_handler(CommandHandler("nextgame", next_game))
-    dispatcher.add_handler(CommandHandler("stats", stats))
+    application.add_handler(CommandHandler("start", start))
+    application.add_handler(CommandHandler("help", help_command))
+    application.add_handler(CommandHandler("news", news))
+    application.add_handler(CommandHandler("nextgame", next_game))
+    application.add_handler(CommandHandler("stats", stats))
 
     # Adicionar o handler para respostas conversacionais usando GPT-J
-    dispatcher.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
 
     print("✅ Bot rodando com integração ao GPT-J via Hugging Face...")
-    updater.start_polling()
-    updater.idle()
+    await application.run_polling()
 
 if __name__ == "__main__":
-    main()
+    import asyncio
+    asyncio.run(main())
